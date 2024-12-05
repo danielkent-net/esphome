@@ -57,7 +57,7 @@ def _translate_pin(value):
 def validate_gpio_pin(value):
     value = _translate_pin(value)
     board = CORE.data[KEY_RP2040][KEY_BOARD]
-    if board == "rpipicow" and value == 32:
+    if board in ("rpipicow", "rpipico2w") and value == 32:
         return value  # Special case for Pico-w LED pin
     if value < 0 or value > 29:
         raise cv.Invalid(f"RP2040: Invalid pin number: {value}")
@@ -66,7 +66,7 @@ def validate_gpio_pin(value):
 
 def validate_supports(value):
     board = CORE.data[KEY_RP2040][KEY_BOARD]
-    if board != "rpipicow" or value[CONF_NUMBER] != 32:
+    if board not in ("rpipicow", "rpipico2w") or value[CONF_NUMBER] != 32:
         return value
     mode = value[CONF_MODE]
     is_input = mode[CONF_INPUT]
