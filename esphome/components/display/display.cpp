@@ -1,6 +1,6 @@
 #include "display.h"
-#include "display_color_utils.h"
 #include <utility>
+#include "display_color_utils.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
 
@@ -266,8 +266,9 @@ void Display::filled_gauge(int center_x, int center_y, int radius1, int radius2,
         if (dymax < float(-dxmax) * tan_a) {
           upd_dxmax = ceil(float(dymax) / tan_a);
           hline_width = -dxmax - upd_dxmax + 1;
-        } else
+        } else {
           hline_width = 0;
+        }
       }
       if (hline_width > 0)
         this->horizontal_line(center_x + dxmax, center_y - dymax, hline_width, color);
@@ -670,7 +671,7 @@ void Display::strftime(int x, int y, BaseFont *font, Color color, Color backgrou
     this->print(x, y, font, color, align, buffer, background);
 }
 void Display::strftime(int x, int y, BaseFont *font, Color color, TextAlign align, const char *format, ESPTime time) {
-  this->strftime(x, y, font, color, COLOR_OFF, TextAlign::TOP_LEFT, format, time);
+  this->strftime(x, y, font, color, COLOR_OFF, align, format, time);
 }
 void Display::strftime(int x, int y, BaseFont *font, Color color, const char *format, ESPTime time) {
   this->strftime(x, y, font, color, COLOR_OFF, TextAlign::TOP_LEFT, format, time);
@@ -814,8 +815,20 @@ void Display::test_card() {
 
 DisplayPage::DisplayPage(display_writer_t writer) : writer_(std::move(writer)) {}
 void DisplayPage::show() { this->parent_->show_page(this); }
-void DisplayPage::show_next() { this->next_->show(); }
-void DisplayPage::show_prev() { this->prev_->show(); }
+void DisplayPage::show_next() {
+  if (this->next_ == nullptr) {
+    ESP_LOGE(TAG, "no next page");
+    return;
+  }
+  this->next_->show();
+}
+void DisplayPage::show_prev() {
+  if (this->prev_ == nullptr) {
+    ESP_LOGE(TAG, "no previous page");
+    return;
+  }
+  this->prev_->show();
+}
 void DisplayPage::set_parent(Display *parent) { this->parent_ = parent; }
 void DisplayPage::set_prev(DisplayPage *prev) { this->prev_ = prev; }
 void DisplayPage::set_next(DisplayPage *next) { this->next_ = next; }
